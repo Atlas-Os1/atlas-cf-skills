@@ -1,29 +1,16 @@
 {
   "name": "atlas-cf-skills",
-  "version": "1.0.0",
-  "description": "Cloudflare Worker skills for Atlas agents - TDD approach",
+  "version": "0.1.0",
+  "description": "Cloudflare Worker skills for Atlas agents",
   "type": "module",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "deploy": "echo 'Use cd skills/<skill-name> && npm run deploy'",
-    "dev": "wrangler dev"
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "cloudflare",
-    "workers",
-    "atlas",
-    "skills",
-    "tdd"
-  ],
-  "author": "Atlas-OS",
-  "license": "MIT",
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.5.0",
-    "@cloudflare/workers-types": "^4.20241218.0",
-    "vitest": "^2.1.8",
-    "wrangler": "^3.102.0"
-  },
-  "dependencies": {}
+    "@cloudflare/workers-types": "^4.20241230.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
 }
