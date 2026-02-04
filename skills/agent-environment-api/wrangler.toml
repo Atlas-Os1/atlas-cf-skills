@@ -1,0 +1,21 @@
+name = "agent-environment-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Durable Object for health history
+[[durable_objects.bindings]]
+name = "HEALTH_HISTORY"
+class_name = "HealthHistoryDO"
+script_name = "agent-environment-api"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["HealthHistoryDO"]
+
+# Cron trigger - every 5 minutes
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Secrets needed
+# DISCORD_WEBHOOK_URL - for alerts (optional)
