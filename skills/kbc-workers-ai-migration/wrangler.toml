@@ -1,0 +1,10 @@
+name = "kbc-workers-ai-migration"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+# Test environment
+[[env.test]]
