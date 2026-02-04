@@ -19,22 +19,33 @@ export class CloudflareAPIClient {
       ...options,
       headers: {
         'Authorization': `Bearer ${this.apiToken}`,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         ...options.headers
       }
     });
 
     if (!response.ok) {
-      throw new Error(`Cloudflare API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Cloudflare API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 200)}`);
     }
 
-    const data = await response.json();
-    return data.result;
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error(`Expected JSON but got ${contentType}: ${(await response.text()).substring(0, 200)}`);
+    }
+
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      return data.result || data;
+    } catch (e) {
+      throw new Error(`Invalid JSON response from Cloudflare API: ${text.substring(0, 200)}`);
+    }
   }
 
   // Workers
   async listWorkers() {
-    return await this.request(`/accounts/${this.accountId}/workers/scripts`);
+    return await this.request(`/accounts/${this.accountId}/workers/services`);
   }
 
   async getWorkerHealth(name: string) {

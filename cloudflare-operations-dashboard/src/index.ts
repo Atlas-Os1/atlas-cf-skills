@@ -24,6 +24,16 @@ export interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    
+    // Debug: Check if secrets are loaded
+    if (!env.CLOUDFLARE_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) {
+      return new Response(JSON.stringify({
+        error: 'Missing secrets',
+        has_token: !!env.CLOUDFLARE_API_TOKEN,
+        has_account_id: !!env.CLOUDFLARE_ACCOUNT_ID
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+    
     const api = new CloudflareAPIClient(env.CLOUDFLARE_API_TOKEN, env.CLOUDFLARE_ACCOUNT_ID);
     const costs = new CostCalculator();
     const alerts = new AlertManager(env);
