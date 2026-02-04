@@ -12,6 +12,16 @@ import { CloudflareAPIClient } from './cloudflare-api';
 import { CostCalculator } from './cost-calculator';
 import { AlertManager } from './alert-manager';
 
+// Project presets for fast filtering
+const PROJECT_PRESETS: Record<string, string[]> = {
+  'devflo': ['devflo-moltworker'],
+  'kiamichi': ['kiamichi-biz-connect', 'kiamichi-business-agent', 'kiamichi-biz-ai-analyzer', 'kiamichi-facebook-worker'],
+  'minte': ['minte-blog-worker', 'cloudflare-ops-dashboard', 'flo-social-worker'],
+  'srvcflo': ['srvcflo-marketing', 'atlas-admin-ui', 'atlas-srvcflo'],
+  'atlas': ['atlas-admin-ui', 'atlas-dashboard', 'atlas-code-orchestrator', 'memory-search', 'memory-embedder'],
+  'all': [] // Empty array means show all
+};
+
 export interface Env {
   CLOUDFLARE_API_TOKEN: string;
   CLOUDFLARE_ACCOUNT_ID: string;
@@ -236,12 +246,22 @@ async function getDashboardOverview(api: CloudflareAPIClient, project?: string |
     api.listDurableObjects()
   ]);
 
-  // Filter by project if specified
-  const filterByProject = (items: any[]) => 
-    project ? items.filter(item => item.name.includes(project)) : items;
+  // Get project filter list
+  const projectFilters = project && PROJECT_PRESETS[project] ? PROJECT_PRESETS[project] : [];
+  const showAll = !project || project === 'all' || projectFilters.length === 0;
+
+  // Smart filtering: match worker ID/name against project preset list
+  const filterByProject = (items: any[]) => {
+    if (showAll) return items;
+    return items.filter(item => {
+      const name = item.name || item.id || item.title || '';
+      return projectFilters.some(filter => name.includes(filter));
+    });
+  };
 
   return {
-    projects: ['kiamichi-biz-connect', 'twisted-custom-leather', 'srvcflo', 'devflo-moltworker'],
+    available_projects: Object.keys(PROJECT_PRESETS),
+    current_project: project || 'all',
     workers: filterByProject(workers),
     databases: filterByProject(databases),
     r2_buckets: filterByProject(buckets),
@@ -310,8 +330,10 @@ function renderDashboard() {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #f5f5f5; }
-    header { background: #1a1a1a; padding: 1.5rem; border-bottom: 2px solid #ff6b35; }
+    header { background: #1a1a1a; padding: 1.5rem; border-bottom: 2px solid #ff6b35; display: flex; justify-content: space-between; align-items: center; }
     h1 { font-size: 1.75rem; font-weight: 700; }
+    select { background: #2a2a2a; color: #f5f5f5; border: 1px solid #444; border-radius: 4px; padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
+    select:hover { background: #333; }
     .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
     .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; }
@@ -329,6 +351,14 @@ function renderDashboard() {
 <body>
   <header>
     <h1>🌩️ Cloudflare Operations Dashboard</h1>
+    <select id="projectSelect" onchange="switchProject()">
+      <option value="all">All Projects</option>
+      <option value="kiamichi">Kiamichi Biz Connect</option>
+      <option value="minte">Minte.dev</option>
+      <option value="srvcflo">SrvcFlo</option>
+      <option value="devflo">DevFlo</option>
+      <option value="atlas">Atlas</option>
+    </select>
   </header>
   <div class="container">
     <div id="loading">Loading dashboard data...</div>
@@ -339,10 +369,16 @@ function renderDashboard() {
   </div>
   
   <script>
-    async function loadDashboard() {
+    let currentProject = 'all';
+    
+    async function loadDashboard(project = 'all') {
       try {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').innerHTML = 'Loading dashboard data...';
+        
+        const projectParam = project === 'all' ? '' : '?project=' + project;
         const [overview, costs] = await Promise.all([
-          fetch('/api/overview').then(r => r.json()),
+          fetch('/api/overview' + projectParam).then(r => r.json()),
           fetch('/api/costs?timeframe=30d').then(r => r.json())
         ]);
         
@@ -354,6 +390,12 @@ function renderDashboard() {
       } catch (error) {
         document.getElementById('loading').innerHTML = 'Error loading dashboard: ' + error.message;
       }
+    }
+    
+    function switchProject() {
+      const select = document.getElementById('projectSelect');
+      currentProject = select.value;
+      loadDashboard(currentProject);
     }
     
     function renderOverview(data) {
