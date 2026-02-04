@@ -227,11 +227,14 @@ export default {
 };
 
 async function getDashboardOverview(api: CloudflareAPIClient, project?: string | null) {
-  const workers = await api.listWorkers();
-  const databases = await api.listD1Databases();
-  const buckets = await api.listR2Buckets();
-  const namespaces = await api.listKVNamespaces();
-  const durableObjects = await api.listDurableObjects();
+  // Parallelize all API calls for speed
+  const [workers, databases, buckets, namespaces, durableObjects] = await Promise.all([
+    api.listWorkers(),
+    api.listD1Databases(),
+    api.listR2Buckets(),
+    api.listKVNamespaces(),
+    api.listDurableObjects()
+  ]);
 
   // Filter by project if specified
   const filterByProject = (items: any[]) => 
@@ -249,11 +252,15 @@ async function getDashboardOverview(api: CloudflareAPIClient, project?: string |
 }
 
 async function getTotalCosts(api: CloudflareAPIClient, costs: CostCalculator, timeframe: string) {
-  const workersAIUsage = await api.getWorkersAIUsage(timeframe);
-  const r2Costs = await api.getR2Costs(timeframe);
-  const d1Usage = await api.getD1Usage(timeframe);
-  const workersUsage = await api.getWorkersUsage(timeframe);
-  const doCosts = await api.getDOCosts(timeframe);
+  // Parallelize all cost API calls
+  const [workersAIUsage, r2Costs, d1Usage, workersUsage, doCosts, kvUsage] = await Promise.all([
+    api.getWorkersAIUsage(timeframe),
+    api.getR2Costs(timeframe),
+    api.getD1Usage(timeframe),
+    api.getWorkersUsage(timeframe),
+    api.getDOCosts(timeframe),
+    api.getKVUsage(timeframe)
+  ]);
 
   return {
     workers: costs.calculateWorkersCost(workersUsage),
@@ -261,7 +268,7 @@ async function getTotalCosts(api: CloudflareAPIClient, costs: CostCalculator, ti
     r2: r2Costs.total_cost_usd,
     d1: costs.calculateD1Cost(d1Usage),
     durable_objects: doCosts.cost_usd,
-    kv: costs.calculateKVCost(await api.getKVUsage(timeframe)),
+    kv: costs.calculateKVCost(kvUsage),
     total_usd: 0 // Sum calculated in CostCalculator
   };
 }
