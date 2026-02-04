@@ -45,7 +45,16 @@ export class CloudflareAPIClient {
 
   // Workers
   async listWorkers() {
-    return await this.request(`/accounts/${this.accountId}/workers/services`);
+    const response = await this.request(`/accounts/${this.accountId}/workers/services`);
+    // Filter to essential fields only (reduce 77KB → ~5KB)
+    if (!Array.isArray(response)) return [];
+    return response.map((w: any) => ({
+      id: w.id,
+      name: w.id, // Services don't have separate names
+      created_on: w.created_on,
+      modified_on: w.modified_on,
+      usage_model: w.usage_model
+    }));
   }
 
   async getWorkerHealth(name: string) {
@@ -113,7 +122,15 @@ export class CloudflareAPIClient {
 
   // D1 Databases
   async listD1Databases() {
-    return await this.request(`/accounts/${this.accountId}/d1/database`);
+    const response = await this.request(`/accounts/${this.accountId}/d1/database`);
+    // Filter to essential fields only
+    if (!Array.isArray(response)) return [];
+    return response.map((db: any) => ({
+      uuid: db.uuid,
+      name: db.name,
+      created_at: db.created_at,
+      version: db.version
+    }));
   }
 
   async getD1Metrics(name: string, timeframe: string) {
@@ -144,21 +161,12 @@ export class CloudflareAPIClient {
 
   // Durable Objects
   async listDurableObjects() {
-    const scripts = await this.listWorkers();
-    const namespaces: any[] = [];
-    
-    // Extract DO namespaces from worker scripts
-    for (const script of scripts) {
-      const scriptDetails = await this.request(
-        `/accounts/${this.accountId}/workers/scripts/${script.id}`
-      );
-      
-      if (scriptDetails.durable_objects?.bindings) {
-        namespaces.push(...scriptDetails.durable_objects.bindings);
-      }
-    }
-    
-    return namespaces;
+    // Note: Durable Objects don't have a dedicated list API
+    // They're part of worker bindings, but fetching individual scripts
+    // returns multipart/form-data (script code) not JSON
+    // TODO: Use GraphQL API or parse wrangler.toml files
+    // For now, return empty array to avoid API errors
+    return [];
   }
 
   async getDOInstances(name: string) {
@@ -185,7 +193,14 @@ export class CloudflareAPIClient {
 
   // R2 Buckets
   async listR2Buckets() {
-    return await this.request(`/accounts/${this.accountId}/r2/buckets`);
+    const response = await this.request(`/accounts/${this.accountId}/r2/buckets`);
+    // Filter to essential fields only
+    if (!Array.isArray(response)) return [];
+    return response.map((bucket: any) => ({
+      name: bucket.name,
+      creation_date: bucket.creation_date,
+      location: bucket.location
+    }));
   }
 
   async getR2Usage(name: string) {
@@ -209,7 +224,14 @@ export class CloudflareAPIClient {
 
   // KV Namespaces
   async listKVNamespaces() {
-    return await this.request(`/accounts/${this.accountId}/storage/kv/namespaces`);
+    const response = await this.request(`/accounts/${this.accountId}/storage/kv/namespaces`);
+    // Filter to essential fields only
+    if (!Array.isArray(response)) return [];
+    return response.map((ns: any) => ({
+      id: ns.id,
+      title: ns.title,
+      supports_url_encoding: ns.supports_url_encoding
+    }));
   }
 
   async getKVMetrics(name: string, timeframe: string) {
