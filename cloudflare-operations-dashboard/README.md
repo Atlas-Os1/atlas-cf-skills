@@ -46,13 +46,13 @@ wrangler secret put TELEGRAM_CHAT_ID
 
 **Dashboard UI:**
 ```
-https://ops.srvcflo.com/
+https://ops.minte.dev/
 ```
 
 **API:**
 ```bash
-curl https://ops.srvcflo.com/api/overview
-curl https://ops.srvcflo.com/api/costs?timeframe=30d
+curl https://ops.minte.dev/api/overview
+curl https://ops.minte.dev/api/costs?timeframe=30d
 ```
 
 ## API Endpoints
@@ -132,7 +132,7 @@ POST /api/alerts/test - Send test alert
 **Custom Alerts:**
 
 ```bash
-curl -X POST https://ops.srvcflo.com/api/alerts \
+curl -X POST https://ops.minte.dev/api/alerts \
   -H "Content-Type: application/json" \
   -d '{
     "metric": "error_rate",
@@ -153,7 +153,7 @@ curl -X POST https://ops.srvcflo.com/api/alerts \
 **Filter by project:**
 
 ```bash
-curl https://ops.srvcflo.com/api/overview?project=kiamichi-biz-connect
+curl https://ops.minte.dev/api/overview?project=kiamichi-biz-connect
 ```
 
 ## Dashboard UI
@@ -196,7 +196,7 @@ npm test
 wrangler dev
 
 # Test alerts
-curl -X POST https://ops.srvcflo.com/api/alerts/test
+curl -X POST https://ops.minte.dev/api/alerts/test
 ```
 
 ## Troubleshooting
@@ -227,7 +227,7 @@ curl -X POST https://ops.srvcflo.com/api/alerts/test
 
 ```yaml
 Service: UptimeRobot (or similar)
-URL: https://ops.srvcflo.com/api/overview
+URL: https://ops.minte.dev/api/overview
 Interval: 5 minutes
 Alert if: Response time >10s OR HTTP status ≠200
 ```

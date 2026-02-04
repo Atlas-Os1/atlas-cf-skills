@@ -6,7 +6,7 @@ workers_dev = true
 [env.production]
 name = "cloudflare-ops-dashboard"
 routes = [
-  { pattern = "ops.srvcflo.com/*", zone_name = "srvcflo.com" }
+  { pattern = "ops.minte.dev/*", zone_name = "minte.dev" }
 ]
 
 # Secrets (set with wrangler secret put)

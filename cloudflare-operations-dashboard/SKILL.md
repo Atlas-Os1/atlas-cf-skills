@@ -68,7 +68,7 @@ wrangler secret put TELEGRAM_CHAT_ID
 wrangler dev
 
 # Production
-https://ops.srvcflo.com/
+https://ops.minte.dev/
 ```
 
 ---
@@ -188,7 +188,7 @@ POST /api/alerts/test
 
 ```typescript
 // Get overview of all resources
-const overview = await fetch('https://ops.srvcflo.com/api/overview')
+const overview = await fetch('https://ops.minte.dev/api/overview')
   .then(r => r.json());
 
 console.log(`Workers: ${overview.workers.length}`);
@@ -196,7 +196,7 @@ console.log(`D1 Databases: ${overview.databases.length}`);
 console.log(`R2 Buckets: ${overview.r2_buckets.length}`);
 
 // Check specific Worker health
-const kbcHealth = await fetch('https://ops.srvcflo.com/api/workers/kiamichi-biz-connect/health')
+const kbcHealth = await fetch('https://ops.minte.dev/api/workers/kiamichi-biz-connect/health')
   .then(r => r.json());
 
 console.log(`Status: ${kbcHealth.status}`);
@@ -207,7 +207,7 @@ console.log(`Uptime: ${kbcHealth.uptime_percent}%`);
 
 ```typescript
 // Get monthly cost breakdown
-const costs = await fetch('https://ops.srvcflo.com/api/costs?timeframe=30d')
+const costs = await fetch('https://ops.minte.dev/api/costs?timeframe=30d')
   .then(r => r.json());
 
 console.log('Monthly Costs:');
@@ -218,7 +218,7 @@ console.log(`  D1: $${costs.d1}`);
 console.log(`  Total: $${costs.total_usd}`);
 
 // Forecast next month
-const forecast = await fetch('https://ops.srvcflo.com/api/costs/forecast')
+const forecast = await fetch('https://ops.minte.dev/api/costs/forecast')
   .then(r => r.json());
 
 console.log(`Estimated next month: $${forecast.estimated_total_usd}`);
@@ -229,7 +229,7 @@ console.log(`Trend: ${forecast.trend_percent > 0 ? '+' : ''}${forecast.trend_per
 
 ```typescript
 // Configure error rate alert
-await fetch('https://ops.srvcflo.com/api/alerts', {
+await fetch('https://ops.minte.dev/api/alerts', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -241,7 +241,7 @@ await fetch('https://ops.srvcflo.com/api/alerts', {
 });
 
 // Configure cost spike alert
-await fetch('https://ops.srvcflo.com/api/alerts', {
+await fetch('https://ops.minte.dev/api/alerts', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -252,7 +252,7 @@ await fetch('https://ops.srvcflo.com/api/alerts', {
 });
 
 // Test notifications
-await fetch('https://ops.srvcflo.com/api/alerts/test', { method: 'POST' });
+await fetch('https://ops.minte.dev/api/alerts/test', { method: 'POST' });
 ```
 
 ---
@@ -322,7 +322,7 @@ Dashboard auto-detects projects based on Worker/resource naming patterns:
 
 ### Dashboard UI
 
-**Access:** `https://ops.srvcflo.com/`
+**Access:** `https://ops.minte.dev/`
 
 **Features:**
 - Real-time health status
@@ -395,13 +395,13 @@ Dashboard auto-detects projects based on Worker/resource naming patterns:
 
 ```bash
 # Check dashboard uptime
-curl https://ops.srvcflo.com/api/overview
+curl https://ops.minte.dev/api/overview
 
 # Monitor dashboard logs
 wrangler tail cloudflare-ops-dashboard
 
 # Set up external monitoring (UptimeRobot, etc.)
-# Monitor: https://ops.srvcflo.com/api/overview
+# Monitor: https://ops.minte.dev/api/overview
 # Interval: 5 minutes
 # Alert if: Response time >10s OR HTTP status ≠200
 ```
